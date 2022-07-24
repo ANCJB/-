@@ -1,0 +1,59 @@
+*&------------------------------------------------ ---------------------*
+*& 报告 ZCJB05
+*&
+*&------------------------------------------------ ---------------------*
+*&
+*&
+*&------------------------------------------------ ---------------------*
+
+报告 ZCJB05。
+
+**内部テーブルを定义するには、まず①「构造」の定义を行い、②定义した构造を用いて内部テーブルを定义する流れです。
+**①「构造的定义」
+类型： CJ_TEST 开始，
+  VBELN 类型 VBAK-VBELN,
+  VDATU 类型 VBAK-VDATU,
+  VRKME 类型 VBAP-VRKME,
+  WERKS 类型 VBAP-WERKS,
+  PRGRS 类型 VBEP-PRGRS,
+  EDATU 类型 VBEP-EDATU,
+
+CJ_TEST 结束。
+
+**②定义した构造を用いて内部テーブルを定义
+数据：WB_TEST 类型 CJ_TEST，
+            CJ_TEST 的内部测试类型表。
+
+**内部结合（内部テーブル定义した后）
+选择
+      VBAK~VBELN
+       VBAK~VDATU
+       VBAP~VRKME
+       VBAP~WERKS
+       VBEP~PRGRS
+       VBEP~EDATU
+
+       来自 VBAK
+内连接VBAP
+            开 VBAK~VBELN = VBAP~VBELN
+内连接 VBEP
+            开 VBEP~VBELN = VBAK~VBELN
+           与 VBEP~VBELN = VBAP~VBELN
+INTO TABLE INNER_TEST
+其中 VBAK~VBELN = `0000004970` 或 VBAK~VBELN = `0000004971`。
+
+*示例删除重复项
+SORT INNER_TEST BY VBELN ASCENDING。"~~ 升序
+  从 INNER_TEST 比较 VBELN 中删除相邻的重复项。
+
+**成绩を出力（读取内表）
+在 INNER_TEST 循环到 WB_TEST 。
+  写：/
+       WB_TEST-VBELN,
+       WB_TEST-VDATU,
+       WB_TEST-VRKME,
+       WB_TEST-WERKS,
+       WB_TEST-PRGRS,
+        WB_TEST-EDATU。
+清除：WB_TEST。
+  ENDLOOP。
